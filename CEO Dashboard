@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synvara CEO Dashboard | Brandon Close</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #00d4ff;
+            --success: #00ff88;
+            --warning: #ffb800;
+            --danger: #ff3366;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --card-bg: #1e2139;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--highlight), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .header .last-updated {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 0.9em;
+            color: var(--highlight);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-card .label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .metric-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .metric-card .change {
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .metric-card.positive .value {
+            color: var(--success);
+        }
+
+        .metric-card.negative .value {
+            color: var(--danger);
+        }
+
+        .metric-card.neutral .value {
+            color: var(--highlight);
+        }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(135deg, var(--highlight), var(--success));
+            border-radius: 2px;
+        }
+
+        .burn-rate-tracker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .burn-item {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--highlight);
+        }
+
+        .burn-item .item-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .burn-item .item-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--highlight), var(--success));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .pipeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .pipeline-table th {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--highlight);
+            border-bottom: 2px solid var(--highlight);
+        }
+
+        .pipeline-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pipeline-table tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.hot {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--danger);
+        }
+
+        .status-badge.warm {
+            background: rgba(255, 184, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .status-badge.cold {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--highlight);
+        }
+
+        .status-badge.closed {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .action-items {
+            list-style: none;
+        }
+
+        .action-item {
+            background: rgba(255, 184, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--warning);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .action-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 184, 0, 0.15);
+        }
+
+        .action-number {
+            background: var(--warning);
+            color: var(--primary);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-content h3 {
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 1.1em;
+        }
+
+        .action-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .tech-progress-link {
+            display: block;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .tech-progress-link:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.02);
+        }
+
+        .tech-progress-link .link-icon {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            border: 2px dashed rgba(0, 212, 255, 0.3);
+            margin-top: 20px;
+        }
+
+        .financial-outlook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .outlook-item {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .outlook-item .outlook-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .outlook-item .outlook-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--highlight), var(--success));
+            color: var(--text);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .refresh-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 212, 255, 0.6);
+        }
+
+        .editable-field {
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            padding: 5px;
+            border-radius: 4px;
+            cursor: text;
+            transition: all 0.3s ease;
+        }
+
+        .editable-field:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--highlight);
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .pipeline-table {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Synvara CEO Dashboard</h1>
+            <div class="subtitle">Brandon Close | Real-time Business Metrics</div>
+            <div class="last-updated" id="lastUpdated">Last Updated: <span id="timestamp"></span></div>
+        </div>
+
+        <!-- Key Metrics Overview -->
+        <div class="metrics-grid">
+            <div class="metric-card positive">
+                <div class="label">💰 Current Runway</div>
+                <div class="value editable-field" contenteditable="true" id="runway">12.5</div>
+                <div class="change">months remaining</div>
+            </div>
+
+            <div class="metric-card neutral">
+                <div class="label">🔥 Monthly Burn Rate</div>
+                <div class="value editable-field" contenteditable="true" id="burnRate">$167K</div>
+                <div class="change">avg last 3 months</div>
+            </div>
+
+            <div class="metric-card positive">
+                <div class="label">📊 ARR (Annual Recurring Revenue)</div>
+                <div class="value editable-field" contenteditable="true" id="arr">$1.2M</div>
+                <div class="change">↑ 240% YoY</div>
+            </div>
+
+            <div class="metric-card positive">
+                <div class="label">📈 MRR (Monthly Recurring Revenue)</div>
+                <div class="value editable-field" contenteditable="true" id="mrr">$100K</div>
+                <div class="change">↑ 18% MoM</div>
+            </div>
+
+            <div class="metric-card neutral">
+                <div class="label">🎯 Pipeline Value</div>
+                <div class="value editable-field" contenteditable="true" id="pipelineValue">$3.4M</div>
+                <div class="change">across 14 opportunities</div>
+            </div>
+
+            <div class="metric-card positive">
+                <div class="label">💵 Cash on Hand</div>
+                <div class="value editable-field" contenteditable="true" id="cashOnHand">$2.08M</div>
+                <div class="change">as of today</div>
+            </div>
+        </div>
+
+        <!-- Burn Rate & Operating Expenses -->
+        <div class="section">
+            <h2>💸 Burn Rate & Operating Expenses</h2>
+            <div class="burn-rate-tracker">
+                <div class="burn-item">
+                    <div class="item-label">Monthly Payroll</div>
+                    <div class="item-value editable-field" contenteditable="true" id="payroll">$95,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 57%;"></div>
+                    </div>
+                </div>
+                <div class="burn-item">
+                    <div class="item-label">Cloud Infrastructure</div>
+                    <div class="item-value editable-field" contenteditable="true" id="cloudInfra">$28,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 17%;"></div>
+                    </div>
+                </div>
+                <div class="burn-item">
+                    <div class="item-label">Office & Operations</div>
+                    <div class="item-value editable-field" contenteditable="true" id="operations">$18,500</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 11%;"></div>
+                    </div>
+                </div>
+                <div class="burn-item">
+                    <div class="item-label">Marketing & Sales</div>
+                    <div class="item-value editable-field" contenteditable="true" id="marketing">$15,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 9%;"></div>
+                    </div>
+                </div>
+                <div class="burn-item">
+                    <div class="item-label">Legal & Compliance</div>
+                    <div class="item-value editable-field" contenteditable="true" id="legal">$6,500</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 4%;"></div>
+                    </div>
+                </div>
+                <div class="burn-item">
+                    <div class="item-label">Other Expenses</div>
+                    <div class="item-value editable-field" contenteditable="true" id="other">$4,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 2%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tech Progress Tracker -->
+        <div class="section">
+            <h2>⚙️ Technical Progress Dashboard</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                Track development milestones, sprint progress, and technical roadmap execution.
+            </p>
+            <a href="YOUR_GOOGLE_SHEETS_LINK_HERE" target="_blank" class="tech-progress-link" id="techDashboardLink">
+                <span class="link-icon">📊</span>
+                <strong style="display: block; font-size: 1.2em; margin-bottom: 5px;">Open Technical Dashboard</strong>
+                <span style="color: var(--text-secondary);">Click to view live Google Sheets tracking</span>
+            </a>
+            <div class="chart-placeholder">
+                📈 Technical Progress Chart (Connect to your sheets for live data)
+            </div>
+        </div>
+
+        <!-- Revenue Pipeline -->
+        <div class="section">
+            <h2>🎯 Revenue Pipeline (Daily Review)</h2>
+            <table class="pipeline-table">
+                <thead>
+                    <tr>
+                        <th>Opportunity</th>
+                        <th>Value</th>
+                        <th>Stage</th>
+                        <th>Probability</th>
+                        <th>Expected Close</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="pipelineTableBody">
+                    <tr>
+                        <td><strong>Wisconsin Technical College</strong></td>
+                        <td>$275,000</td>
+                        <td>Contract Negotiation</td>
+                        <td>85%</td>
+                        <td>Q1 2026</td>
+                        <td><span class="status-badge hot">🔥 Hot</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Keller Williams Expansion</strong></td>
+                        <td>$450,000</td>
+                        <td>Proposal Submitted</td>
+                        <td>70%</td>
+                        <td>Q1 2026</td>
+                        <td><span class="status-badge hot">🔥 Hot</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>LA Kings Partnership</strong></td>
+                        <td>$180,000</td>
+                        <td>Discovery Call</td>
+                        <td>55%</td>
+                        <td>Q2 2026</td>
+                        <td><span class="status-badge warm">🟡 Warm</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Delta Airlines Integration</strong></td>
+                        <td>$650,000</td>
+                        <td>Technical Review</td>
+                        <td>60%</td>
+                        <td>Q2 2026</td>
+                        <td><span class="status-badge warm">🟡 Warm</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Enterprise Client A</strong></td>
+                        <td>$225,000</td>
+                        <td>Initial Contact</td>
+                        <td>30%</td>
+                        <td>Q3 2026</td>
+                        <td><span class="status-badge cold">❄️ Cold</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(0, 255, 136, 0.1); border-radius: 10px;">
+                <strong style="color: var(--success);">Pipeline Summary:</strong>
+                <span style="color: var(--text-secondary); margin-left: 15px;">Total Value: $1.78M | Weighted Value: $1.12M | Avg Deal Size: $356K</span>
+            </div>
+        </div>
+
+        <!-- ARR & MRR Tracking -->
+        <div class="section">
+            <h2>📊 ARR & MRR: Actuals vs Plan</h2>
+            <div class="financial-outlook-grid">
+                <div class="outlook-item">
+                    <div class="outlook-label">ARR Target 2026</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$4.17M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">ARR Actual</div>
+                    <div class="outlook-value" style="color: var(--success);">$1.2M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">% to Target</div>
+                    <div class="outlook-value" style="color: var(--warning);">28.8%</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">MRR Target Dec</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$125K</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">MRR Actual Dec</div>
+                    <div class="outlook-value" style="color: var(--success);">$100K</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Gap to Close</div>
+                    <div class="outlook-value" style="color: var(--danger);">$25K</div>
+                </div>
+            </div>
+            <div class="chart-placeholder" style="margin-top: 30px;">
+                📈 ARR/MRR Growth Chart (Jan 2025 - Dec 2026)
+            </div>
+        </div>
+
+        <!-- Financial Outlook -->
+        <div class="section">
+            <h2>💼 Financial Outlook (Next 12 Months)</h2>
+            <div class="financial-outlook-grid">
+                <div class="outlook-item">
+                    <div class="outlook-label">Q1 2026 Revenue</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$875K</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Q2 2026 Revenue</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$1.02M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Q3 2026 Revenue</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$1.15M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Q4 2026 Revenue</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$1.28M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Gross Margin</div>
+                    <div class="outlook-value" style="color: var(--success);">78%</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">EBITDA (Dec 2026)</div>
+                    <div class="outlook-value" style="color: var(--danger);">-$845K</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Funding Needed</div>
+                    <div class="outlook-value editable-field" contenteditable="true">$4M</div>
+                </div>
+                <div class="outlook-item">
+                    <div class="outlook-label">Break Even Date</div>
+                    <div class="outlook-value editable-field" contenteditable="true">Q3 2027</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Action Items -->
+        <div class="section">
+            <h2>🎯 Top 5 Daily Actions</h2>
+            <ul class="action-items">
+                <li class="action-item">
+                    <div class="action-number">1</div>
+                    <div class="action-content">
+                        <h3>Close Wisconsin Technical College Deal ($275K)</h3>
+                        <p><strong>Action:</strong> Follow up on contract terms, address final pricing concerns, and push for signature by EOW. This is 85% probability and will improve runway by 1.6 months.</p>
+                    </div>
+                </li>
+                <li class="action-item">
+                    <div class="action-number">2</div>
+                    <div class="action-content">
+                        <h3>Accelerate Seed Fundraising ($4M Round)</h3>
+                        <p><strong>Action:</strong> Schedule follow-up calls with top 3 interested investors from last week's pitches. Update financial model with Q4 actuals and send refreshed deck by COB Thursday.</p>
+                    </div>
+                </li>
+                <li class="action-item">
+                    <div class="action-number">3</div>
+                    <div class="action-content">
+                        <h3>Review Technical Roadmap Progress</h3>
+                        <p><strong>Action:</strong> Daily standup with CTO on FORGE CloudShell launch timeline. Confirm Pulsaris/OS beta readiness for Delta Airlines demo next week. Check node architecture completion status.</p>
+                    </div>
+                </li>
+                <li class="action-item">
+                    <div class="action-number">4</div>
+                    <div class="action-content">
+                        <h3>Optimize Monthly Burn Rate</h3>
+                        <p><strong>Action:</strong> Review cloud infrastructure costs with DevOps. Current $28K/month seems high - explore optimization opportunities to reduce to $22K without impacting performance.</p>
+                    </div>
+                </li>
+                <li class="action-item">
+                    <div class="action-number">5</div>
+                    <div class="action-content">
+                        <h3>Advance Keller Williams Expansion ($450K)</h3>
+                        <p><strong>Action:</strong> Schedule executive presentation with KW leadership. Prepare ROI analysis showing 5x return on Training BOTs deployment across their 950 market centers.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <button class="refresh-button" onclick="updateDashboard()">🔄 Refresh Data</button>
+
+    <script>
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateTimestamp();
+            loadSavedData();
+        }
+
+        // Update dashboard with latest data
+        function updateDashboard() {
+            updateTimestamp();
+            
+            // Add refresh animation
+            const button = document.querySelector('.refresh-button');
+            button.textContent = '⏳ Refreshing...';
+            button.style.transform = 'rotate(360deg)';
+            
+            setTimeout(() => {
+                button.textContent = '✅ Updated!';
+                button.style.transform = 'rotate(0deg)';
+                
+                setTimeout(() => {
+                    button.textContent = '🔄 Refresh Data';
+                }, 1500);
+            }, 1000);
+            
+            // Save current data
+            saveData();
+        }
+
+        // Save editable field data to localStorage
+        function saveData() {
+            const editableFields = document.querySelectorAll('.editable-field');
+            const data = {};
+            
+            editableFields.forEach(field => {
+                if (field.id) {
+                    data[field.id] = field.textContent;
+                }
+            });
+            
+            localStorage.setItem('synvaraDashboardData', JSON.stringify(data));
+        }
+
+        // Load saved data from localStorage
+        function loadSavedData() {
+            const savedData = localStorage.getItem('synvaraDashboardData');
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                Object.keys(data).forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.textContent = data[fieldId];
+                    }
+                });
+            }
+        }
+
+        // Auto-save on field changes
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+            
+            const editableFields = document.querySelectorAll('.editable-field');
+            editableFields.forEach(field => {
+                field.addEventListener('blur', saveData);
+            });
+        });
+
+        // Calculate metrics dynamically
+        function calculateMetrics() {
+            const payroll = parseFloat(document.getElementById('payroll').textContent.replace(/[$,]/g, ''));
+            const cloudInfra = parseFloat(document.getElementById('cloudInfra').textContent.replace(/[$,]/g, ''));
+            const operations = parseFloat(document.getElementById('operations').textContent.replace(/[$,]/g, ''));
+            const marketing = parseFloat(document.getElementById('marketing').textContent.replace(/[$,]/g, ''));
+            const legal = parseFloat(document.getElementById('legal').textContent.replace(/[$,]/g, ''));
+            const other = parseFloat(document.getElementById('other').textContent.replace(/[$,]/g, ''));
+            
+            const totalBurn = payroll + cloudInfra + operations + marketing + legal + other;
+            const cashOnHand = parseFloat(document.getElementById('cashOnHand').textContent.replace(/[$,M]/g, '')) * 1000000;
+            const runway = (cashOnHand / totalBurn).toFixed(1);
+            
+            document.getElementById('burnRate').textContent = '$' + (totalBurn / 1000).toFixed(0) + 'K';
+            document.getElementById('runway').textContent = runway;
+        }
+
+        // Add keyboard shortcut for refresh (Cmd/Ctrl + R)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+                e.preventDefault();
+                updateDashboard();
+            }
+        });
+    </script>
+</body>
+</html>
